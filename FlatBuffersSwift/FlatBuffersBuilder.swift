@@ -34,14 +34,13 @@ public struct FlatBuffersBuilderOptions {
     public let uniqueTables : Bool
     public let uniqueVTables : Bool
     public let forceDefaults : Bool
-    public let nullTerminatedUTF8 : Bool
-    public init(initialCapacity : Int = 1, uniqueStrings : Bool = true, uniqueTables : Bool = true, uniqueVTables : Bool = true, forceDefaults : Bool = false, nullTerminatedUTF8 : Bool = false) {
+
+    public init(initialCapacity : Int = 1, uniqueStrings : Bool = true, uniqueTables : Bool = true, uniqueVTables : Bool = true, forceDefaults : Bool = false) {
         self.initialCapacity = initialCapacity
         self.uniqueStrings = uniqueStrings
         self.uniqueTables = uniqueTables
         self.uniqueVTables = uniqueVTables
         self.forceDefaults = forceDefaults
-        self.nullTerminatedUTF8 = nullTerminatedUTF8
     }
 }
 
@@ -426,26 +425,15 @@ public final class FlatBuffersBuilder {
                 return o
             }
         }
-        // TODO: Performance Test
-        if options.nullTerminatedUTF8 {
-            let utf8View = value.utf8CString
-            let length = utf8View.count
-            align(size: 4, additionalBytes: length)
-            reserveAdditionalCapacity(size: length)
-            for c in utf8View.lazy.reversed() {
-                insert(value: c)
-            }
-            insert(value: Int32(length - 1))
-        } else {
-            let utf8View = value.utf8
-            let length = utf8View.count
-            align(size: 4, additionalBytes: length)
-            reserveAdditionalCapacity(size: length)
-            for c in utf8View.lazy.reversed() {
-                insert(value: c)
-            }
-            insert(value: Int32(length))
+
+        let utf8View = value.utf8CString
+        let length = utf8View.count
+        align(size: 4, additionalBytes: length)
+        reserveAdditionalCapacity(size: length)
+        for c in utf8View.lazy.reversed() {
+            insert(value: c)
         }
+        insert(value: Int32(length - 1))
 
         let o = Offset(cursor)
         if options.uniqueStrings {

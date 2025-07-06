@@ -29,8 +29,10 @@ extension ContactList.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : ContactList.Direct<T>, t2 : ContactList.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : ContactList.Direct<T>, t2 : ContactList.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var lastModified: Int64 {
@@ -164,11 +166,13 @@ extension Contact.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : Contact.Direct<T>, t2 : Contact.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : Contact.Direct<T>, t2 : Contact.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
-    public var name: UnsafeBufferPointer<UInt8>? {
+    public var name: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -399,8 +403,10 @@ extension Date.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : Date.Direct<T>, t2 : Date.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : Date.Direct<T>, t2 : Date.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var day: Int8 {
@@ -534,8 +540,10 @@ extension AddressEntry.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : AddressEntry.Direct<T>, t2 : AddressEntry.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : AddressEntry.Direct<T>, t2 : AddressEntry.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var order: Int32 {
@@ -819,15 +827,17 @@ extension PostalAddress.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : PostalAddress.Direct<T>, t2 : PostalAddress.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : PostalAddress.Direct<T>, t2 : PostalAddress.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
-    public var country: UnsafeBufferPointer<UInt8>? {
+    public var country: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
-    public var city: UnsafeBufferPointer<UInt8>? {
+    public var city: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:1) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -835,7 +845,7 @@ extension PostalAddress.Direct {
 
         return _reader.get(objectOffset: _myOffset, propertyIndex: 2, defaultValue: 0)
     }
-    public var streetAndNumber: UnsafeBufferPointer<UInt8>? {
+    public var streetAndNumber: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:3) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -943,11 +953,13 @@ extension EmailAddress.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : EmailAddress.Direct<T>, t2 : EmailAddress.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : EmailAddress.Direct<T>, t2 : EmailAddress.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
-    public var mailto: UnsafeBufferPointer<UInt8>? {
+    public var mailto: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -1034,11 +1046,13 @@ extension WebAddress.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : WebAddress.Direct<T>, t2 : WebAddress.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : WebAddress.Direct<T>, t2 : WebAddress.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
-    public var url: UnsafeBufferPointer<UInt8>? {
+    public var url: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -1125,11 +1139,13 @@ extension TelephoneNumber.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : TelephoneNumber.Direct<T>, t2 : TelephoneNumber.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : TelephoneNumber.Direct<T>, t2 : TelephoneNumber.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
-    public var number: UnsafeBufferPointer<UInt8>? {
+    public var number: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }

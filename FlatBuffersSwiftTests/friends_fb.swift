@@ -27,8 +27,10 @@ extension PeopleList.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : PeopleList.Direct<T>, t2 : PeopleList.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : PeopleList.Direct<T>, t2 : PeopleList.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var people: FlatBuffersTableVector<Friend.Direct<T>, T> {
@@ -151,11 +153,13 @@ extension Friend.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : Friend.Direct<T>, t2 : Friend.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : Friend.Direct<T>, t2 : Friend.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
-    public var name: UnsafeBufferPointer<UInt8>? {
+    public var name: Data? {
         guard let offset = _reader.offset(objectOffset: _myOffset, propertyIndex:0) else {return nil}
         return _reader.stringBuffer(stringOffset: offset)
     }
@@ -435,8 +439,10 @@ extension Male.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : Male.Direct<T>, t2 : Male.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : Male.Direct<T>, t2 : Male.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var ref: Friend.Direct<T>? {
@@ -533,8 +539,10 @@ extension Female.Direct {
             }
         }
     }
-    public var hashValue: Int { return Int(_myOffset) }
-    public static func ==<T>(t1 : Female.Direct<T>, t2 : Female.Direct<T>) -> Bool {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(_myOffset)
+    }
+    public static func ==(t1 : Female.Direct<T>, t2 : Female.Direct<T>) -> Bool {
         return t1._reader.isEqual(other: t2._reader) && t1._myOffset == t2._myOffset
     }
     public var ref: Friend.Direct<T>? {

@@ -31,7 +31,7 @@ public protocol FlatBuffersReader {
 
      - Returns: a direct pointer to a subrange from the underlying reader buffer.
      */
-    func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8>
+    func bytes(at offset : Int, length : Int) throws -> Data
     func isEqual(other : FlatBuffersReader) -> Bool
 }
 
@@ -93,7 +93,7 @@ public extension FlatBuffersReader {
 
      - Returns: the final offset in the reader buffer to access a given property for a given object-offset
      */
-    public func offset(objectOffset : Offset, propertyIndex : Int) -> Offset? {
+    func offset(objectOffset : Offset, propertyIndex : Int) -> Offset? {
 
         let propOffset = propertyOffset(objectOffset: objectOffset, propertyIndex: propertyIndex)
         if propOffset == 0 {
@@ -123,7 +123,7 @@ public extension FlatBuffersReader {
 
      - Returns: the number of elements in the vector
      */
-    public func vectorElementCount(vectorOffset : Offset?) -> Int {
+    func vectorElementCount(vectorOffset : Offset?) -> Int {
         guard let vectorOffset = vectorOffset else {
             return 0
         }
@@ -145,7 +145,7 @@ public extension FlatBuffersReader {
 
      - Returns: the offset in the buffer for a given vector element
      */
-    public func vectorElementOffset(vectorOffset : Offset?, index : Int) -> Offset? {
+    func vectorElementOffset(vectorOffset : Offset?, index : Int) -> Offset? {
         guard let vectorOffset = vectorOffset else {
             return nil
         }
@@ -176,7 +176,7 @@ public extension FlatBuffersReader {
 
      - Returns: a scalar value directly from a vector for a given index
      */
-    public func vectorElementScalar<T : Scalar>(vectorOffset : Offset?, index : Int) -> T? {
+    func vectorElementScalar<T : Scalar>(vectorOffset : Offset?, index : Int) -> T? {
         guard let vectorOffset = vectorOffset else {
             return nil
         }
@@ -206,7 +206,7 @@ public extension FlatBuffersReader {
 
      - Returns: a scalar value directly from a vector for a given index
      */
-    public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int, defaultValue : T) -> T {
+    func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int, defaultValue : T) -> T {
         let propOffset = propertyOffset(objectOffset: objectOffset, propertyIndex: propertyIndex)
         if propOffset == 0 {
             return defaultValue
@@ -228,7 +228,7 @@ public extension FlatBuffersReader {
 
      - Returns: a scalar value directly from a vector for a given index
      */
-    public func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int) -> T? {
+    func get<T : Scalar>(objectOffset : Offset, propertyIndex : Int) -> T? {
         let propOffset = propertyOffset(objectOffset: objectOffset, propertyIndex: propertyIndex)
         if propOffset == 0 {
             return nil
@@ -249,7 +249,7 @@ public extension FlatBuffersReader {
 
      - Returns:  a buffer pointer to the subrange of the reader buffer occupied by a string
      */
-    public func stringBuffer(stringOffset : Offset?) -> UnsafeBufferPointer<UInt8>? {
+    func stringBuffer(stringOffset : Offset?) -> Data? {
         guard let stringOffset = stringOffset else {
             return nil
         }
@@ -269,7 +269,7 @@ public extension FlatBuffersReader {
 
      - Returns:  the offset for the root table object
      */
-    public var rootObjectOffset : Offset? {
+    var rootObjectOffset : Offset? {
         do {
             return try scalar(at: 0) as Offset
         } catch {
@@ -346,12 +346,11 @@ public final class FlatBuffersMemoryReader : FlatBuffersReader {
         return buffer.load(fromByteOffset: offset, as: T.self)
     }
 
-    public func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
+    public func bytes(at offset : Int, length : Int) throws -> Data {
         if Int(offset + length) > count {
             throw FlatBuffersReaderError.outOfBufferBounds
         }
-        let pointer = buffer.advanced(by:offset).bindMemory(to: UInt8.self, capacity: length)
-        return UnsafeBufferPointer<UInt8>.init(start: pointer, count: Int(length))
+        return Data(bytesNoCopy: UnsafeMutableRawPointer(mutating: buffer.advanced(by:offset)), count: length, deallocator: .none)
     }
 
     public func isEqual(other: FlatBuffersReader) -> Bool{
@@ -388,14 +387,6 @@ public final class FlatBuffersFileReader : FlatBuffersReader {
     private struct DataCacheKey : Hashable {
         let offset : Int
         let lenght : Int
-
-        static func ==(a : DataCacheKey, b : DataCacheKey) -> Bool {
-            return a.offset == b.offset && a.lenght == b.lenght
-        }
-
-        var hashValue: Int {
-            return offset
-        }
     }
 
     private var dataCache : [DataCacheKey:Data] = [:]
@@ -426,7 +417,7 @@ public final class FlatBuffersFileReader : FlatBuffersReader {
         }
     }
 
-    public func bytes(at offset : Int, length : Int) throws -> UnsafeBufferPointer<UInt8> {
+    public func bytes(at offset : Int, length : Int) throws -> Data {
         if UInt64(offset + length) > fileSize {
             throw FlatBuffersReaderError.outOfBufferBounds
         }
@@ -438,16 +429,11 @@ public final class FlatBuffersFileReader : FlatBuffersReader {
             data = _data
         } else {
             fileHandle.seek(toFileOffset: UInt64(offset))
-            data = fileHandle.readData(ofLength:Int(length))
+            data = try fileHandle.read(upToCount: Int(length)) ?? Data()
             dataCache[cacheKey] = data
         }
 
-        var t : UnsafeBufferPointer<UInt8>! = nil
-        data.withUnsafeBytes{
-            t = UnsafeBufferPointer(start: $0, count: length)
-        }
-
-        return t
+        return data
     }
 
     public func isEqual(other: FlatBuffersReader) -> Bool{
@@ -460,11 +446,9 @@ public final class FlatBuffersFileReader : FlatBuffersReader {
 
 postfix operator §
 
-public postfix func §(value: UnsafeBufferPointer<UInt8>?) -> String? {
-    guard let p = value?.baseAddress, let value = value else {
-        return nil
-    }
-    return String.init(bytesNoCopy: UnsafeMutablePointer<UInt8>(mutating: p), length: value.count, encoding: String.Encoding.utf8, freeWhenDone: false)
+public postfix func §(value: Data?) -> String? {
+    guard let value = value else { return nil }
+    return String(data: value, encoding: .utf8)
 }
 
 public protocol FlatBuffersDirectAccess {
@@ -586,7 +570,7 @@ public struct FlatBuffersStringVector<R : FlatBuffersReader> : Collection {
         return i+1
     }
 
-    public subscript(i : Int) -> UnsafeBufferPointer<UInt8>? {
+    public subscript(i : Int) -> Data? {
         let offset = reader.vectorElementOffset(vectorOffset: myOffset, index: i)
         return reader.stringBuffer(stringOffset: offset)
     }

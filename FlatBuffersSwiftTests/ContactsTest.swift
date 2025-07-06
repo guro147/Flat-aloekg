@@ -110,7 +110,7 @@ class ContactsTest: XCTestCase {
         let i1 = entries[0]!
         let i2 = entries[1]!
         
-        XCTAssertEqual(i1.name?§, "Maxim")
+        XCTAssertEqual(i1.name§, "Maxim")
         XCTAssertEqual(i1.birthday!.day, 12)
         XCTAssertEqual(i1.birthday!.month, 6)
         XCTAssertEqual(i1.birthday!.year, 1981)
